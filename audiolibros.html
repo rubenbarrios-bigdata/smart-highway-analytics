@@ -481,7 +481,88 @@
       outline: none;
     }
 
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--accent);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .mobile-tip-banner {
+      background: rgba(0, 136, 255, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #bae6fd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      line-height: 1.5;
+    }
+    .tip-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+    }
+    .tip-close:hover {
+      color: #fff;
+    }
+
+    .audio-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .audio-status-pill.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
     @media (max-width: 768px) {
+      body {
+        padding-bottom: 180px;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 18px;
+      }
+      .brand-group {
+        flex-wrap: wrap;
+      }
+      .player-dock {
+        padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      }
       .player-row {
         flex-direction: column;
         gap: 10px;
@@ -493,7 +574,19 @@
       }
       .now-playing {
         width: 100%;
+        justify-content: space-between;
+        min-width: 0;
+      }
+      .playing-info h4 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 230px;
+      }
+      .player-actions {
+        width: 100%;
         justify-content: center;
+        gap: 14px;
       }
     }
   </style>
@@ -509,6 +602,7 @@
         <p>Texto completo y audio sincronizado para preparar tu entrevista en cualquier lugar</p>
       </div>
     </div>
+    <a href="index.html" class="back-btn" title="Volver al Dashboard Ejecutivo">← Volver al Dashboard</a>
   </header>
 
   <!-- Navigation Tabs -->
@@ -526,6 +620,12 @@
 
   <!-- Main Content -->
   <main>
+
+    <!-- Mobile Audio Tip Banner -->
+    <div class="mobile-tip-banner" id="mobileTipBanner">
+      <span>💡 <strong>Tip para celulares:</strong> Si al presionar ▶ no se escucha el audio, verificá que el interruptor lateral de silencio de tu teléfono esté desactivado y subí el volumen multimedia. También podés descargarlo directamente con el botón <strong>⬇</strong>.</span>
+      <button class="tip-close" onclick="document.getElementById('mobileTipBanner').style.display='none'" title="Cerrar aviso">✕</button>
+    </div>
 
     <!-- ==================== LIBRO 1 ==================== -->
     <div id="book1" class="book-view active">
@@ -841,7 +941,7 @@
       
       <!-- Track Info -->
       <div class="now-playing">
-        <div class="playing-icon">🎧</div>
+        <div class="playing-icon" id="playingIcon">🎧</div>
         <div class="playing-info">
           <h4 id="trackTitle">Audiolibro 1: Guía Maestra de Entrevista</h4>
           <p id="trackSub">Voz en Español Neutro (Sabina) &bull; MP3 128 kbps</p>
@@ -851,31 +951,37 @@
       <!-- Scrub Bar -->
       <div class="scrub-container">
         <span class="time-text" id="currentTime">00:00</span>
-        <div class="progress-bar-wrap" id="progressBar" onclick="seekAudio(event)">
+        <div class="progress-bar-wrap" id="progressBar">
           <div class="progress-fill-bar" id="progressFill"></div>
         </div>
-        <span class="time-text" id="durationTime">--:--</span>
+        <span class="time-text" id="durationTime">09:18</span>
       </div>
 
       <!-- Actions -->
       <div class="player-actions">
-        <button class="btn-circle" onclick="skipAudio(-15)" title="Retroceder 15s">⏪</button>
-        <button class="btn-circle btn-play-main" id="btnPlay" onclick="togglePlay()">▶</button>
-        <button class="btn-circle" onclick="skipAudio(15)" title="Adelantar 15s">⏩</button>
+        <button class="btn-circle" onclick="skipAudio(-15)" title="Retroceder 15s" aria-label="Retroceder 15s">⏪</button>
+        <button class="btn-circle btn-play-main" id="btnPlay" onclick="togglePlay()" title="Reproducir / Pausar" aria-label="Reproducir o pausar">▶</button>
+        <button class="btn-circle" onclick="skipAudio(15)" title="Adelantar 15s" aria-label="Adelantar 15s">⏩</button>
         
-        <select class="speed-select" id="speedSelect" onchange="changeSpeed(this.value)">
-          <option value="1.0">1.0x</option>
+        <select class="speed-select" id="speedSelect" onchange="changeSpeed(this.value)" title="Velocidad de reproducción">
+          <option value="0.75">0.75x</option>
+          <option value="1.0" selected>1.0x</option>
           <option value="1.25">1.25x</option>
           <option value="1.5">1.5x</option>
           <option value="2.0">2.0x</option>
         </select>
+
+        <a class="btn-circle" id="btnDownload" href="Audiolibro_1_Guia_Entrevista.mp3" download title="Descargar MP3 para escuchar sin conexión" style="text-decoration:none;">⬇</a>
       </div>
 
     </div>
+    <div id="audioStatusContainer" style="display:none; text-align:center; margin-top:4px;">
+      <span id="audioStatusText" class="audio-status-pill"></span>
+    </div>
   </div>
 
-  <!-- Audio Element -->
-  <audio id="mainAudio" src="Audiolibro_1_Guia_Entrevista_la Concesión Vial.mp3" preload="metadata"></audio>
+  <!-- Audio Element (Audio HTML5 con soporte móvil) -->
+  <audio id="mainAudio" src="Audiolibro_1_Guia_Entrevista.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
   <script>
     const audio = document.getElementById('mainAudio');
@@ -885,30 +991,55 @@
     const currentTimeEl = document.getElementById('currentTime');
     const durationTimeEl = document.getElementById('durationTime');
     const trackTitle = document.getElementById('trackTitle');
+    const trackSub = document.getElementById('trackSub');
     const speedSelect = document.getElementById('speedSelect');
+    const btnDownload = document.getElementById('btnDownload');
+    const statusContainer = document.getElementById('audioStatusContainer');
+    const statusText = document.getElementById('audioStatusText');
+    const playingIcon = document.getElementById('playingIcon');
 
     const bookTracks = {
       book1: {
-        src: 'Audiolibro_1_Guia_Entrevista_la Concesión Vial.mp3',
-        title: 'Audiolibro 1: Guía Maestra de Entrevista'
+        src: 'Audiolibro_1_Guia_Entrevista.mp3',
+        title: 'Audiolibro 1: Guía Maestra de Entrevista',
+        sub: 'Preparación de Entrevista & Q&A • MP3 128 kbps',
+        duration: '09:18'
       },
       book2: {
-        src: 'Audiolibro_2_Flujo_Analisis_Datos_la Concesión Vial.mp3',
-        title: 'Audiolibro 2: Flujo de Análisis de Datos & Gobierno IT'
+        src: 'Audiolibro_2_Flujo_Analisis_Datos.mp3',
+        title: 'Audiolibro 2: Flujo de Análisis de Datos & Gobierno IT',
+        sub: 'Día a Día Bloque por Bloque & BLUF • MP3 128 kbps',
+        duration: '06:05'
       },
       book3: {
-        src: 'Audiolibro_3_Plan_de_Medicion_la Concesión Vial.mp3',
-        title: 'Audiolibro 3: Plan de Medición y Gobierno del Dato'
+        src: 'Audiolibro_3_Plan_de_Medicion.mp3',
+        title: 'Audiolibro 3: Plan de Medición y Gobierno del Dato',
+        sub: '6 Pilares, Métricas & BigQuery + dbt • MP3 128 kbps',
+        duration: '05:07'
       }
     };
 
     let currentBookId = 'book1';
 
+    function setStatus(msg, isError = false) {
+      if (!msg) {
+        statusContainer.style.display = 'none';
+        return;
+      }
+      statusContainer.style.display = 'block';
+      statusText.textContent = msg;
+      if (isError) {
+        statusText.classList.add('error');
+      } else {
+        statusText.classList.remove('error');
+      }
+    }
+
     function switchBook(bookId, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.book-view').forEach(v => v.classList.remove('active'));
 
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
       const targetView = document.getElementById(bookId);
       if (targetView) targetView.classList.add('active');
 
@@ -916,39 +1047,75 @@
         currentBookId = bookId;
         const track = bookTracks[bookId];
         trackTitle.textContent = track.title;
+        trackSub.textContent = track.sub;
+        durationTimeEl.textContent = track.duration;
+        currentTimeEl.textContent = '00:00';
+        progressFill.style.width = '0%';
+        btnDownload.href = track.src;
+
         const wasPlaying = !audio.paused;
         audio.src = track.src;
+        audio.playbackRate = parseFloat(speedSelect.value);
         audio.load();
+
         if (wasPlaying) {
-          audio.play();
-          btnPlay.textContent = '⏸';
+          playAudio();
         } else {
           btnPlay.textContent = '▶';
+          playingIcon.textContent = '🎧';
+          setStatus('');
         }
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function playAudio() {
+      setStatus('Iniciando audio...');
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          btnPlay.textContent = '⏸';
+          playingIcon.textContent = '🔊';
+          setStatus('');
+        }).catch(err => {
+          console.warn("Autoplay bloqueado o error al reproducir:", err);
+          btnPlay.textContent = '▶';
+          playingIcon.textContent = '🎧';
+          setStatus('Tocá ▶ para reproducir el audio', false);
+        });
+      }
+    }
+
     function togglePlay() {
       if (audio.paused) {
-        audio.play();
-        btnPlay.textContent = '⏸';
+        playAudio();
       } else {
         audio.pause();
         btnPlay.textContent = '▶';
+        playingIcon.textContent = '🎧';
+        setStatus('');
       }
     }
 
     function skipAudio(seconds) {
-      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
+      const dur = audio.duration || 0;
+      audio.currentTime = Math.max(0, Math.min(dur, audio.currentTime + seconds));
     }
 
     function changeSpeed(val) {
       audio.playbackRate = parseFloat(val);
     }
 
+    function jumpToTime(seconds) {
+      if (audio.readyState === 0) {
+        audio.load();
+      }
+      audio.currentTime = seconds;
+      playAudio();
+    }
+
     function formatTime(sec) {
-      if (isNaN(sec)) return '00:00';
+      if (isNaN(sec) || sec < 0) return '00:00';
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
       return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
@@ -966,20 +1133,58 @@
       durationTimeEl.textContent = formatTime(audio.duration);
     });
 
-    audio.addEventListener('ended', () => {
-      btnPlay.textContent = '▶';
-      progressFill.style.width = '0%';
+    audio.addEventListener('play', () => {
+      btnPlay.textContent = '⏸';
+      playingIcon.textContent = '🔊';
     });
 
-    function seekAudio(e) {
+    audio.addEventListener('pause', () => {
+      btnPlay.textContent = '▶';
+      playingIcon.textContent = '🎧';
+    });
+
+    audio.addEventListener('waiting', () => {
+      setStatus('Cargando buffer...');
+    });
+
+    audio.addEventListener('playing', () => {
+      setStatus('');
+    });
+
+    audio.addEventListener('ended', () => {
+      btnPlay.textContent = '▶';
+      playingIcon.textContent = '🎧';
+      progressFill.style.width = '0%';
+      currentTimeEl.textContent = '00:00';
+      setStatus('');
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.error("Audio error:", audio.error);
+      btnPlay.textContent = '▶';
+      playingIcon.textContent = '⚠️';
+      setStatus('Error al cargar audio. Tocá ⬇ para descargarlo o escucharlo directamente.', true);
+    });
+
+    function handleSeek(clientX) {
       const rect = progressBar.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
+      const clickX = Math.max(0, Math.min(rect.width, clientX - rect.left));
       const width = rect.width;
       const duration = audio.duration;
-      if (duration) {
+      if (duration && width > 0) {
         audio.currentTime = (clickX / width) * duration;
       }
     }
+
+    progressBar.addEventListener('click', (e) => {
+      handleSeek(e.clientX);
+    });
+
+    progressBar.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleSeek(e.touches[0].clientX);
+      }
+    }, { passive: true });
   </script>
 </body>
 </html>
