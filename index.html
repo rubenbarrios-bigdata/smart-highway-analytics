@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Ejecutivo de Operaciones & Gobierno IT | AUSOL - GCO (Abertis)</title>
+  <title>Dashboard Ejecutivo de Operaciones & Gobierno IT | Concesiones Viales Inteligentes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -502,9 +502,9 @@
   <!-- Top Navigation Header -->
   <header>
     <div class="brand-container">
-      <div class="brand-badge">AUSOL & GCO</div>
+      <div class="brand-badge">CONCESIÓN VIAL METROPOLITANA</div>
       <div class="brand-info">
-        <h1>Centro de Control & Inteligencia Operativa IT <span style="font-size: 12px; color: var(--text-dim); font-weight: normal;">| Grupo Abertis</span></h1>
+        <h1>Centro de Control & Inteligencia Operativa IT <span style="font-size: 12px; color: var(--text-dim); font-weight: normal;">| Red de Autopistas</span></h1>
         <p>Modelo Analítico: BigQuery + dbt Core + Marco COBIT (Enaxis GRC)</p>
       </div>
     </div>
@@ -514,9 +514,9 @@
         <span>ENAXIS SYNC: ONLINE</span>
       </div>
       <select class="station-select" id="stationFilter" onchange="handleStationFilter(this.value)">
-        <option value="ALL">Todas las Estaciones (AUSOL + Oeste)</option>
-        <option value="CAMPANA">Troncal Campana (Panamericana)</option>
-        <option value="ITUZAINGO">Peaje Ituzaingó (Acceso Oeste)</option>
+        <option value="ALL">Todas las Estaciones (Troncal Norte + Troncal Oeste)</option>
+        <option value="CAMPANA">Troncal Norte (Ramal Campana)</option>
+        <option value="ITUZAINGO">Troncal Oeste (Ituzaingó)</option>
       </select>
     </div>
   </header>
@@ -713,7 +713,7 @@
               </thead>
               <tbody>
                 <tr style="background: rgba(0, 136, 255, 0.05);">
-                  <td>Panamericana AUSOL</td>
+                  <td>Corredor Norte (Panamericana)</td>
                   <td><strong>Troncal Campana</strong></td>
                   <td><span class="badge-pill badge-info">Pico Mañana CABA (07-10)</span></td>
                   <td class="mono-cell" style="font-weight: bold;">8 veh</td>
@@ -721,7 +721,7 @@
                   <td class="mono-cell">6.33 seg</td>
                 </tr>
                 <tr>
-                  <td>Panamericana AUSOL</td>
+                  <td>Corredor Norte (Panamericana)</td>
                   <td>Troncal Campana</td>
                   <td><span class="badge-pill badge-info">Pico Tarde Provincia (17-20)</span></td>
                   <td class="mono-cell">4 veh</td>
@@ -729,7 +729,7 @@
                   <td class="mono-cell">5.18 seg</td>
                 </tr>
                 <tr>
-                  <td>Panamericana AUSOL</td>
+                  <td>Corredor Norte (Panamericana)</td>
                   <td>Troncal Campana</td>
                   <td><span class="badge-pill badge-warning">Horario No Pico</span></td>
                   <td class="mono-cell">2 veh</td>
@@ -737,7 +737,7 @@
                   <td class="mono-cell">6.35 seg</td>
                 </tr>
                 <tr style="background: rgba(0, 136, 255, 0.05);">
-                  <td>Acceso Oeste GCO</td>
+                  <td>Corredor Oeste</td>
                   <td><strong>Peaje Ituzaingó</strong></td>
                   <td><span class="badge-pill badge-info">Pico Mañana CABA (07-10)</span></td>
                   <td class="mono-cell" style="font-weight: bold;">4 veh</td>
@@ -745,7 +745,7 @@
                   <td class="mono-cell">5.73 seg</td>
                 </tr>
                 <tr>
-                  <td>Acceso Oeste GCO</td>
+                  <td>Corredor Oeste</td>
                   <td>Peaje Ituzaingó</td>
                   <td><span class="badge-pill badge-warning">Horario No Pico</span></td>
                   <td class="mono-cell">2 veh</td>
@@ -753,7 +753,7 @@
                   <td class="mono-cell" style="color: #f87171;">10.55 seg</td>
                 </tr>
                 <tr>
-                  <td>Acceso Oeste GCO</td>
+                  <td>Corredor Oeste</td>
                   <td>Peaje Ituzaingó</td>
                   <td><span class="badge-pill badge-info">Pico Tarde Provincia (17-20)</span></td>
                   <td class="mono-cell">2 veh</td>
@@ -1008,7 +1008,7 @@
             <div class="step-content">
               <h3>Ingesta Cruda a Google BigQuery (Capa RAW)</h3>
               <p>Los controladores SAC de cada vía y los servidores BOS transmiten millones de registros crudos en formato JSON/Avro. Caen a la tabla <code>raw_transitos_peaje</code> particionada por día y clusterizada por estación. En esta etapa los datos tienen lecturas de RFID repetidas en menos de 500 ms y patentes con ruido de OCR.</p>
-              <span class="code-pill">Dataset: ausol-analytics-prod.peajes_raw</span>
+              <span class="code-pill">Dataset: highway-analytics-prod.peajes_raw</span>
             </div>
           </div>
 
@@ -1017,7 +1017,7 @@
             <div class="step-content">
               <h3>Conexión Segura dbt &larr;&rarr; BigQuery</h3>
               <p>dbt Core se conecta a BigQuery mediante una Cuenta de Servicio (Service Account) con roles de lectura en RAW y escritura en MARTS, configurado en <code>profiles.yml</code> con claves JSON seguras. No se ejecutan consultas a mano.</p>
-              <span class="code-pill">Service Account: ausol-dbt-sa@ausol-analytics.iam.gserviceaccount.com</span>
+              <span class="code-pill">Service Account: dbt-runner-sa@highway-analytics-prod.iam.gserviceaccount.com</span>
             </div>
           </div>
 
@@ -1047,10 +1047,10 @@
   <!-- Global Footer -->
   <footer>
     <div>
-      <strong>Dashboard de Demostración Técnica:</strong> Elaborado por <strong>Rubén Barrios</strong> (Analista de Datos) para entrevista con Alejandro Savy & Iván Cáceres.
+      <strong>Dashboard de Demostración Técnica:</strong> Elaborado por <strong>Rubén Barrios</strong> (Analista de Datos) | Caso de Estudio de Ingeniería de Tráfico & Gobierno IT.
     </div>
     <div>
-      Entorno: BigQuery Sandbox / MySQL 8.0 &bull; Ecosistema Abertis GRC
+      Entorno: BigQuery Sandbox / MySQL 8.0 &bull; Ecosistema de Gobierno IT & GRC
     </div>
   </footer>
 

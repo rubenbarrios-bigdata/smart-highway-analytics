@@ -3,7 +3,7 @@
 > **Interactive Multi-Page Executive Dashboard — Highway Telemetry, Data Governance & Cloud Architecture**  
 > Developed by **Rubén Barrios** (Data & Analytics Specialist).
 
-🌐 **Acceso Público en Vivo:** [https://rubenbarrios-bigdata.github.io/ausol-gco-dashboard/](https://rubenbarrios-bigdata.github.io/ausol-gco-dashboard/)
+🌐 **Acceso Público en Vivo:** [https://rubenbarrios-bigdata.github.io/smart-highway-analytics/](https://rubenbarrios-bigdata.github.io/smart-highway-analytics/)
 
 ---
 
