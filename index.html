@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Ejecutivo de Operaciones & Gobierno IT | AUSOL - GCO (Abertis)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-main: #0a0f1d;
+      --bg-card: rgba(16, 24, 47, 0.85);
+      --bg-card-hover: rgba(23, 35, 68, 0.95);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(0, 168, 255, 0.4);
+      --primary: #0088ff;
+      --primary-glow: rgba(0, 136, 255, 0.35);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.25);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.25);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 10% 20%, #0d1630 0%, #060913 90%);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(10, 15, 29, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #0088ff 0%, #0055b3 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .brand-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .station-select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .station-select:hover {
+      border-color: var(--primary);
+    }
+
+    /* Sub-nav Tabs (Multi-page Simulation) */
+    .nav-tabs {
+      background: rgba(14, 21, 41, 0.6);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 28px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 14px 20px;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 -2px 8px var(--primary);
+    }
+
+    /* Main Container */
+    main {
+      padding: 24px 28px;
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page-view {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .kpi-card.success::before { background: var(--success); }
+    .kpi-card.warning::before { background: var(--warning); }
+    .kpi-card.danger::before { background: var(--danger); }
+
+    .kpi-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
+    }
+
+    .kpi-subtext {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-info { background: rgba(0, 136, 255, 0.15); color: #60a5fa; }
+
+    /* Layout Grids */
+    .dashboard-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .panel-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Modern Table Styles */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .mono-cell {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--primary), #38bdf8);
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .alert-icon {
+      font-size: 20px;
+      color: var(--danger);
+    }
+
+    .alert-content h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fca5a5;
+    }
+
+    .alert-content p {
+      font-size: 12px;
+      color: #f87171;
+    }
+
+    /* Architecture Flow Interactive */
+    .arch-flow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .arch-step {
+      background: #0f172a;
+      border: 1.5px solid #1e293b;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .arch-step:hover {
+      border-color: var(--primary);
+      border-left-color: #38bdf8;
+      background: #131d36;
+      transform: translateX(3px);
+    }
+
+    .step-number {
+      background: linear-gradient(135deg, #0088ff 0%, #0055b3 100%);
+      color: #ffffff;
+      font-weight: 800;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .step-content h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .step-content p {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .code-pill {
+      display: inline-block;
+      background: #030712;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 16px 28px;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 15, 29, 0.7);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand-container">
+      <div class="brand-badge">AUSOL & GCO</div>
+      <div class="brand-info">
+        <h1>Centro de Control & Inteligencia Operativa IT <span style="font-size: 12px; color: var(--text-dim); font-weight: normal;">| Grupo Abertis</span></h1>
+        <p>Modelo Analítico: BigQuery + dbt Core + Marco COBIT (Enaxis GRC)</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="live-indicator">
+        <div class="pulse-dot"></div>
+        <span>ENAXIS SYNC: ONLINE</span>
+      </div>
+      <select class="station-select" id="stationFilter" onchange="handleStationFilter(this.value)">
+        <option value="ALL">Todas las Estaciones (AUSOL + Oeste)</option>
+        <option value="CAMPANA">Troncal Campana (Panamericana)</option>
+        <option value="ITUZAINGO">Peaje Ituzaingó (Acceso Oeste)</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Sub-Navigation (Multi-Page Tabs) -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-gobierno')">
+      🛡️ 1. Gobierno IT & SLAs (COBIT)
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-operaciones')">
+      ⏱️ 2. Franjas Horarias Oficiales (DNV)
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-saturacion')">
+      📊 3. Ranking de Vías (Window Functions)
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-auditoria')">
+      🚨 4. Auditoría, Fugas & TelePASE
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-dbt')">
+      ☁️ 5. Linaje de Datos: BigQuery + dbt
+    </button>
+  </nav>
+
+  <!-- Main View Area -->
+  <main>
+
+    <!-- ==================== PÁGINA 1: GOBIERNO IT & SLAS (COBIT) ==================== -->
+    <div id="tab-gobierno" class="page-view active">
+      
+      <!-- Critical SLA Alert -->
+      <div class="alert-banner">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <h4>Alerta Contractual COBIT APO10: Cámaras OCR en Estado Degradado (98.20% vs SLA 99.80%)</h4>
+          <p>Se registraron 42 minutos promedio de resolución (MTTR) por pérdida de enlace en Peaje Ituzaingó. Conforme a las cláusulas de concesión, se generó la no conformidad automática en ENAXIS para auditoría de proveedores.</p>
+        </div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card success">
+          <div class="kpi-title">
+            <span>Uptime General Vías (SAC)</span>
+            <span class="badge-pill badge-success">ÓPTIMO</span>
+          </div>
+          <div class="kpi-value">99.85%</div>
+          <div class="kpi-subtext">Meta COBIT BAI04: &ge; 99.80%</div>
+        </div>
+
+        <div class="kpi-card danger">
+          <div class="kpi-title">
+            <span>Disponibilidad Cámaras OCR</span>
+            <span class="badge-pill badge-danger">SLA CRÍTICO</span>
+          </div>
+          <div class="kpi-value">98.20%</div>
+          <div class="kpi-subtext">3 incidentes activos en Ituzaingó</div>
+        </div>
+
+        <div class="kpi-card warning">
+          <div class="kpi-title">
+            <span>Antenas RFID (Kapsch)</span>
+            <span class="badge-pill badge-warning">ALERTA</span>
+          </div>
+          <div class="kpi-value">99.70%</div>
+          <div class="kpi-subtext">MTTR: 25.0 min (Meta: &lt; 30 min)</div>
+        </div>
+
+        <div class="kpi-card success">
+          <div class="kpi-title">
+            <span>TelePASE BOS Clearing</span>
+            <span class="badge-pill badge-success">100% OK</span>
+          </div>
+          <div class="kpi-value">99.98%</div>
+          <div class="kpi-subtext">0 incidentes | 0.0 min caída</div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Chart + Table -->
+      <div class="dashboard-row">
+        <!-- SLA Table -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Matriz de Acuerdos de Nivel de Servicio (SLA) & Incidentes IT</h2>
+              <span class="panel-subtitle">Auditoría directa conectada a Enaxis GRC (Procesos BAI04 y APO10)</span>
+            </div>
+            <span class="badge-pill badge-info">15 de Octubre, 2026</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Proceso COBIT</th>
+                  <th>Sistema Tecnológico</th>
+                  <th>Uptime %</th>
+                  <th>Incidentes</th>
+                  <th>MTTR (Min)</th>
+                  <th>Estado del SLA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="code-pill">BAI04</span></td>
+                  <td><strong>Cámaras OCR/ANPR</strong></td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">98.20%</td>
+                  <td>3</td>
+                  <td class="mono-cell">42.00 min</td>
+                  <td><span class="badge-pill badge-danger">Incumplimiento Crítico</span></td>
+                </tr>
+                <tr>
+                  <td><span class="code-pill">APO10</span></td>
+                  <td><strong>Antenas RFID Proveedor Kapsch</strong></td>
+                  <td class="mono-cell" style="color: #fbbf24; font-weight: bold;">99.70%</td>
+                  <td>1</td>
+                  <td class="mono-cell">25.00 min</td>
+                  <td><span class="badge-pill badge-warning">Alerta: SLA Degradado</span></td>
+                </tr>
+                <tr>
+                  <td><span class="code-pill">BAI04</span></td>
+                  <td><strong>SAC Carriles Peaje</strong></td>
+                  <td class="mono-cell" style="color: #34d399;">99.85%</td>
+                  <td>1</td>
+                  <td class="mono-cell">14.50 min</td>
+                  <td><span class="badge-pill badge-success">Cumple SLA Óptimo</span></td>
+                </tr>
+                <tr>
+                  <td><span class="code-pill">BAI04</span></td>
+                  <td><strong>TelePASE BOS Clearing</strong></td>
+                  <td class="mono-cell" style="color: #34d399;">99.98%</td>
+                  <td>0</td>
+                  <td class="mono-cell">0.00 min</td>
+                  <td><span class="badge-pill badge-success">Cumple SLA Óptimo</span></td>
+                </tr>
+                <tr>
+                  <td><span class="code-pill">BAI04</span></td>
+                  <td><strong>Enaxis GRC Plataforma</strong></td>
+                  <td class="mono-cell" style="color: #34d399;">99.99%</td>
+                  <td>0</td>
+                  <td class="mono-cell">0.00 min</td>
+                  <td><span class="badge-pill badge-success">Cumple SLA Óptimo</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SLA Chart -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Uptime vs. Umbral Contractual</h2>
+              <span class="panel-subtitle">Límite SLA: 99.80%</span>
+            </div>
+          </div>
+          <div style="height: 250px;">
+            <canvas id="slaChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PÁGINA 2: FRANJAS PICO OFICIALES (DNV) ==================== -->
+    <div id="tab-operaciones" class="page-view">
+      
+      <!-- Summary Info Banner -->
+      <div style="background: rgba(0, 136, 255, 0.08); border: 1px solid rgba(0, 136, 255, 0.25); border-radius: 10px; padding: 14px 18px; margin-bottom: 22px;">
+        <h4 style="color: #60a5fa; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Reglamentación DNV de Horas Pico (Días Hábiles)</h4>
+        <p style="color: var(--text-muted); font-size: 12px; line-height: 1.5;">
+          • <strong>Pico Mañana:</strong> 07:00 a 10:00 hs (Sentido Hacia CABA) — Concentra el <strong>57% del volumen</strong> y más del <strong>50% de la recaudación</strong> diaria.<br>
+          • <strong>Pico Tarde:</strong> 17:00 a 20:00 hs (Sentido Hacia Provincia) — Flujo de regreso con tarifas pico contractuales.
+        </p>
+      </div>
+
+      <div class="dashboard-row">
+        <!-- Table Peak Hours -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Recaudación y Tiempos de Atención por Franja Horaria</h2>
+              <span class="panel-subtitle">Resultados validados de la Consulta 1 de SQL</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Autopista</th>
+                  <th>Estación</th>
+                  <th>Franja Oficial DNV</th>
+                  <th>Vehículos</th>
+                  <th>Recaudación ($)</th>
+                  <th>Tiempo Promedio</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: rgba(0, 136, 255, 0.05);">
+                  <td>Panamericana AUSOL</td>
+                  <td><strong>Troncal Campana</strong></td>
+                  <td><span class="badge-pill badge-info">Pico Mañana CABA (07-10)</span></td>
+                  <td class="mono-cell" style="font-weight: bold;">8 veh</td>
+                  <td class="mono-cell" style="color: #34d399; font-weight: bold;">$7.020,00</td>
+                  <td class="mono-cell">6.33 seg</td>
+                </tr>
+                <tr>
+                  <td>Panamericana AUSOL</td>
+                  <td>Troncal Campana</td>
+                  <td><span class="badge-pill badge-info">Pico Tarde Provincia (17-20)</span></td>
+                  <td class="mono-cell">4 veh</td>
+                  <td class="mono-cell">$4.615,00</td>
+                  <td class="mono-cell">5.18 seg</td>
+                </tr>
+                <tr>
+                  <td>Panamericana AUSOL</td>
+                  <td>Troncal Campana</td>
+                  <td><span class="badge-pill badge-warning">Horario No Pico</span></td>
+                  <td class="mono-cell">2 veh</td>
+                  <td class="mono-cell">$1.850,00</td>
+                  <td class="mono-cell">6.35 seg</td>
+                </tr>
+                <tr style="background: rgba(0, 136, 255, 0.05);">
+                  <td>Acceso Oeste GCO</td>
+                  <td><strong>Peaje Ituzaingó</strong></td>
+                  <td><span class="badge-pill badge-info">Pico Mañana CABA (07-10)</span></td>
+                  <td class="mono-cell" style="font-weight: bold;">4 veh</td>
+                  <td class="mono-cell" style="color: #34d399; font-weight: bold;">$5.940,00</td>
+                  <td class="mono-cell">5.73 seg</td>
+                </tr>
+                <tr>
+                  <td>Acceso Oeste GCO</td>
+                  <td>Peaje Ituzaingó</td>
+                  <td><span class="badge-pill badge-warning">Horario No Pico</span></td>
+                  <td class="mono-cell">2 veh</td>
+                  <td class="mono-cell">$3.065,00</td>
+                  <td class="mono-cell" style="color: #f87171;">10.55 seg</td>
+                </tr>
+                <tr>
+                  <td>Acceso Oeste GCO</td>
+                  <td>Peaje Ituzaingó</td>
+                  <td><span class="badge-pill badge-info">Pico Tarde Provincia (17-20)</span></td>
+                  <td class="mono-cell">2 veh</td>
+                  <td class="mono-cell">$2.220,00</td>
+                  <td class="mono-cell" style="color: #f87171;">10.00 seg</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Peak Chart -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Distribución de Recaudación</h2>
+              <span class="panel-subtitle">Pico Mañana vs. Tarde vs. No Pico</span>
+            </div>
+          </div>
+          <div style="height: 260px;">
+            <canvas id="peakChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PÁGINA 3: RANKING DE VÍAS (WINDOW FUNCTIONS) ==================== -->
+    <div id="tab-saturacion" class="page-view">
+      
+      <div class="kpi-grid">
+        <div class="kpi-card success">
+          <div class="kpi-title">
+            <span>Vía #1 en Ituzaingó</span>
+            <span class="badge-pill badge-info">TOP ABSORCIÓN</span>
+          </div>
+          <div class="kpi-value">37.50%</div>
+          <div class="kpi-subtext">Vía 1: TelePASE Exclusivo (1.7s de paso)</div>
+        </div>
+
+        <div class="kpi-card success">
+          <div class="kpi-title">
+            <span>Vía #1 en Campana</span>
+            <span class="badge-pill badge-info">TOP ABSORCIÓN</span>
+          </div>
+          <div class="kpi-value">28.57%</div>
+          <div class="kpi-subtext">Vía 1: TelePASE Exclusivo (1.8s de paso)</div>
+        </div>
+
+        <div class="kpi-card warning">
+          <div class="kpi-title">
+            <span>Demora en Vías Manuales</span>
+            <span class="badge-pill badge-danger">+700%</span>
+          </div>
+          <div class="kpi-value">18.2 seg</div>
+          <div class="kpi-subtext">Ituzaingó Vía 16 (Efectivo / Tarjeta)</div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Ranking de Saturación por Carril mediante Window Functions (`DENSE_RANK` & `SUM OVER`)</h2>
+            <span class="panel-subtitle">Calcula el porcentaje de absorción de cada carril sobre el total de su peaje sin colapsar las filas individuales</span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Estación</th>
+                <th>Vía</th>
+                <th>Tecnología de Cobro</th>
+                <th>Volumen</th>
+                <th>Recaudación</th>
+                <th>Ranking Carril</th>
+                <th>Total Estación</th>
+                <th>% Absorción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Ituzaingo -->
+              <tr style="background: rgba(16, 185, 129, 0.08);">
+                <td><strong>Peaje Ituzaingó</strong></td>
+                <td><strong>Vía 1</strong></td>
+                <td><span class="badge-pill badge-info">TelePASE Exclusivo</span></td>
+                <td class="mono-cell">3 veh</td>
+                <td class="mono-cell">$4.485,00</td>
+                <td><span class="badge-pill badge-success">#1</span></td>
+                <td class="mono-cell">8 veh</td>
+                <td>
+                  <div style="font-weight: bold; color: #34d399;">37.50%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 37.5%;"></div></div>
+                </td>
+              </tr>
+              <tr>
+                <td>Peaje Ituzaingó</td>
+                <td>Vía 4</td>
+                <td><span class="badge-pill badge-warning">Manual Efectivo</span></td>
+                <td class="mono-cell">2 veh</td>
+                <td class="mono-cell">$3.500,00</td>
+                <td><span class="badge-pill badge-info">#2</span></td>
+                <td class="mono-cell">8 veh</td>
+                <td>
+                  <div>25.00%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 25.0%;"></div></div>
+                </td>
+              </tr>
+              <tr>
+                <td>Peaje Ituzaingó</td>
+                <td>Vía 3</td>
+                <td><span class="badge-pill badge-info">TelePASE Mixta</span></td>
+                <td class="mono-cell">1 veh</td>
+                <td class="mono-cell">$1.020,00</td>
+                <td><span class="badge-pill badge-info">#3</span></td>
+                <td class="mono-cell">8 veh</td>
+                <td>
+                  <div>12.50%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 12.5%;"></div></div>
+                </td>
+              </tr>
+              <!-- Campana -->
+              <tr style="background: rgba(16, 185, 129, 0.08);">
+                <td><strong>Troncal Campana</strong></td>
+                <td><strong>Vía 1</strong></td>
+                <td><span class="badge-pill badge-info">TelePASE Exclusivo</span></td>
+                <td class="mono-cell">4 veh</td>
+                <td class="mono-cell">$3.060,00</td>
+                <td><span class="badge-pill badge-success">#1</span></td>
+                <td class="mono-cell">14 veh</td>
+                <td>
+                  <div style="font-weight: bold; color: #34d399;">28.57%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 28.57%;"></div></div>
+                </td>
+              </tr>
+              <tr>
+                <td>Troncal Campana</td>
+                <td>Vía 4</td>
+                <td><span class="badge-pill badge-warning">Manual Efectivo</span></td>
+                <td class="mono-cell">3 veh</td>
+                <td class="mono-cell">$3.600,00</td>
+                <td><span class="badge-pill badge-info">#2</span></td>
+                <td class="mono-cell">14 veh</td>
+                <td>
+                  <div>21.43%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 21.43%;"></div></div>
+                </td>
+              </tr>
+              <tr>
+                <td>Troncal Campana</td>
+                <td>Vía 3</td>
+                <td><span class="badge-pill badge-info">TelePASE Mixta</span></td>
+                <td class="mono-cell">2 veh</td>
+                <td class="mono-cell">$1.105,00</td>
+                <td><span class="badge-pill badge-info">#3</span></td>
+                <td class="mono-cell">14 veh</td>
+                <td>
+                  <div>14.29%</div>
+                  <div class="progress-track"><div class="progress-fill" style="width: 14.29%;"></div></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PÁGINA 4: AUDITORÍA & FUGAS ==================== -->
+    <div id="tab-auditoria" class="page-view">
+      <div class="dashboard-row">
+        
+        <!-- Fugas Table -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Auditoría de Fuga de Ingresos & Tags Inválidos</h2>
+              <span class="panel-subtitle">Detección temprana de eventos de carril no cobrados</span>
+            </div>
+            <span class="badge-pill badge-danger">Pérdida: $2.210,00</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Estación</th>
+                  <th>Vía</th>
+                  <th>Tecnología</th>
+                  <th>Incidente</th>
+                  <th>Eventos</th>
+                  <th>Fuga Estimada ($)</th>
+                  <th>Acción de Mitigación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Troncal Campana</strong></td>
+                  <td>Vía 1</td>
+                  <td>TelePASE Exclusivo</td>
+                  <td><span class="badge-pill badge-warning">Tag Inválido</span></td>
+                  <td class="mono-cell">1</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$1.105,00</td>
+                  <td>Verificación en lista negra BOS / Débito diferido</td>
+                </tr>
+                <tr>
+                  <td><strong>Troncal Campana</strong></td>
+                  <td>Vía 3</td>
+                  <td>TelePASE Mixta</td>
+                  <td><span class="badge-pill badge-danger">Evasión / Barrera Rota</span></td>
+                  <td class="mono-cell">1</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$1.105,00</td>
+                  <td>Cámara OCR capturó patente (AB111OP) &rarr; Legales</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TelePASE Adoption -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>TelePASE vs. Cobro Manual</h2>
+              <span class="panel-subtitle">Penetración y velocidad comparada</span>
+            </div>
+          </div>
+          <div style="height: 180px; margin-bottom: 16px;">
+            <canvas id="adoptionChart"></canvas>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+            • <strong>Penetración Promedio:</strong> 63.5% en la traza.<br>
+            • <strong>TelePASE:</strong> 2.1 segundos por paso.<br>
+            • <strong>Efectivo/Manual:</strong> 15.4 segundos (7 veces más lento).
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== PÁGINA 5: LINAJE DE DATOS DBT & BIGQUERY ==================== -->
+    <div id="tab-dbt" class="page-view">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Arquitectura de Conexión: Sistemas de Carril &rarr; BigQuery &rarr; dbt Core &rarr; Dashboards</h2>
+            <span class="panel-subtitle">Cómo se transforman, limpian y auditan los datos de peajes paso a paso</span>
+          </div>
+          <span class="badge-pill badge-success">dbt Cloud / Core: ACTIVE</span>
+        </div>
+
+        <div class="arch-flow-container">
+          <div class="arch-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3>Ingesta Cruda a Google BigQuery (Capa RAW)</h3>
+              <p>Los controladores SAC de cada vía y los servidores BOS transmiten millones de registros crudos en formato JSON/Avro. Caen a la tabla <code>raw_transitos_peaje</code> particionada por día y clusterizada por estación. En esta etapa los datos tienen lecturas de RFID repetidas en menos de 500 ms y patentes con ruido de OCR.</p>
+              <span class="code-pill">Dataset: ausol-analytics-prod.peajes_raw</span>
+            </div>
+          </div>
+
+          <div class="arch-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3>Conexión Segura dbt &larr;&rarr; BigQuery</h3>
+              <p>dbt Core se conecta a BigQuery mediante una Cuenta de Servicio (Service Account) con roles de lectura en RAW y escritura en MARTS, configurado en <code>profiles.yml</code> con claves JSON seguras. No se ejecutan consultas a mano.</p>
+              <span class="code-pill">Service Account: ausol-dbt-sa@ausol-analytics.iam.gserviceaccount.com</span>
+            </div>
+          </div>
+
+          <div class="arch-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3>Transformación y Limpieza en Capas (dbt Staging & Intermediate)</h3>
+              <p>dbt toma el SQL y deduplica las lecturas de RFID mediante ventanas de tiempo, normaliza los textos de patentes en mayúsculas, elimina caracteres raros y cruza los tránsitos con las tarifas oficiales de la Dirección Nacional de Vialidad (DNV) según las franjas pico (07:00-10:00 CABA y 17:00-20:00 Provincia).</p>
+              <span class="code-pill">Modelos: stg_transitos.sql &rarr; int_transitos_enriquecidos.sql</span>
+            </div>
+          </div>
+
+          <div class="arch-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3>Modelos Marts y Pruebas Automáticas de Calidad (dbt Tests)</h3>
+              <p>Se generan las tablas finales agregadas (<code>fct_saturacion_vias</code> y <code>fct_disponibilidad_cobit</code>). dbt ejecuta tests automáticos de unicidad (<code>unique</code>), campos no nulos (<code>not_null</code>) y rangos válidos de latencia antes de que los dashboards de Power BI y Looker Studio lean los datos.</p>
+              <span class="code-pill">Comando de CI/CD: dbt run && dbt test</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer>
+    <div>
+      <strong>Dashboard de Demostración Técnica:</strong> Elaborado por <strong>Rubén Barrios</strong> (Analista de Datos) para entrevista con Alejandro Savy & Iván Cáceres.
+    </div>
+    <div>
+      Entorno: BigQuery Sandbox / MySQL 8.0 &bull; Ecosistema Abertis GRC
+    </div>
+  </footer>
+
+  <!-- Interactive Logic & Chart.js Initialization -->
+  <script>
+    // Tab Switching Function (Multi-Page simulation)
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+
+      if (el) {
+        el.classList.add('active');
+      } else {
+        const btn = document.querySelector(`[onclick*="${tabId}"]`);
+        if (btn) btn.classList.add('active');
+      }
+      const view = document.getElementById(tabId);
+      if (view) view.classList.add('active');
+    }
+
+    // Auto-activate tab from URL hash on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.hash) {
+        const targetTab = window.location.hash.replace('#', '');
+        if (document.getElementById(targetTab)) {
+          switchTab(targetTab);
+        }
+      }
+    });
+
+    // Station Filter simulation
+    function handleStationFilter(val) {
+      console.log("Filtrando datos para estación:", val);
+    }
+
+    // Chart 1: SLA Horizontal Bar Chart
+    const ctxSla = document.getElementById('slaChart').getContext('2d');
+    new Chart(ctxSla, {
+      type: 'bar',
+      data: {
+        labels: ['Cámaras OCR', 'Antenas RFID (Kapsch)', 'SAC Carril', 'TelePASE BOS', 'Enaxis GRC'],
+        datasets: [
+          {
+            label: 'Uptime Real (%)',
+            data: [98.20, 99.70, 99.85, 99.98, 99.99],
+            backgroundColor: [
+              '#ef4444',
+              '#f59e0b',
+              '#10b981',
+              '#10b981',
+              '#10b981'
+            ],
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            min: 97.5,
+            max: 100.0,
+            grid: { color: 'rgba(255,255,255,0.06)' },
+            ticks: { color: '#94a3b8' }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#f1f5f9', font: { size: 11, family: 'Inter' } }
+          }
+        }
+      }
+    });
+
+    // Chart 2: Peak Hours Doughnut Chart
+    const ctxPeak = document.getElementById('peakChart').getContext('2d');
+    new Chart(ctxPeak, {
+      type: 'doughnut',
+      data: {
+        labels: ['Pico Mañana CABA (07-10)', 'Pico Tarde Provincia (17-20)', 'Horario No Pico'],
+        datasets: [
+          {
+            data: [57.2, 28.5, 14.3],
+            backgroundColor: ['#0088ff', '#38bdf8', '#64748b'],
+            borderWidth: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#cbd5e1', font: { size: 11, family: 'Inter' }, padding: 12 }
+          }
+        },
+        cutout: '70%'
+      }
+    });
+
+    // Chart 3: Adoption Doughnut
+    const ctxAdoption = document.getElementById('adoptionChart').getContext('2d');
+    new Chart(ctxAdoption, {
+      type: 'pie',
+      data: {
+        labels: ['TelePASE (Automático)', 'Efectivo / Manual'],
+        datasets: [
+          {
+            data: [63.5, 36.5],
+            backgroundColor: ['#10b981', '#f59e0b'],
+            borderWidth: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#cbd5e1', font: { size: 11, family: 'Inter' } }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
