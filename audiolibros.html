@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audiolibros Interactivos de Estudio | AUSOL & GCO (Grupo Abertis)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: #070d1e;
+      --bg-card: #0f172a;
+      --bg-card-hover: #162038;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #0088ff;
+      --primary-glow: rgba(0, 136, 255, 0.35);
+      --accent: #38bdf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 10% 15%, #0f1c3d 0%, #050813 90%);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: 120px; /* space for sticky player */
+    }
+
+    /* Top Sticky Header */
+    header {
+      background: rgba(10, 15, 29, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge-pill {
+      background: linear-gradient(135deg, #0088ff, #0055b3);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .brand-title h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Nav Tabs */
+    .tab-nav {
+      background: rgba(14, 21, 41, 0.7);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 -2px 8px var(--primary);
+    }
+
+    /* Main Content Container */
+    main {
+      max-width: 960px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 20px;
+      flex: 1;
+    }
+
+    .book-view {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .book-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Chapter Quick Jump Navigation */
+    .toc-card {
+      background: rgba(16, 24, 47, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+
+    .toc-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toc-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toc-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .toc-chip:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Content Cards & Sections */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header .tag {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+    }
+
+    /* Speech Quote Box */
+    .speech-box {
+      background: rgba(0, 136, 255, 0.08);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-style: normal;
+    }
+
+    .speech-box p {
+      font-size: 14px;
+      color: #e2e8f0;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .speech-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .speech-box strong {
+      color: #ffffff;
+    }
+
+    /* Question & Answer Component */
+    .qa-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .qa-box:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .qa-question {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .qa-answer {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.65;
+    }
+
+    .qa-answer strong {
+      color: #fff;
+    }
+
+    /* Highlights / Pill badges */
+    .pill-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .pill-red {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* Sticky Bottom Audio Player */
+    .player-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(10, 15, 29, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 12px 24px;
+      z-index: 200;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 100vw;
+    }
+
+    .player-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+
+    .playing-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .playing-info h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .playing-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Scrub Bar */
+    .scrub-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      max-width: 480px;
+      margin: 0 20px;
+    }
+
+    .time-text {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      min-width: 40px;
+    }
+
+    .progress-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-fill-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .progress-fill-bar::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: -3px;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    .progress-bar-wrap:hover .progress-fill-bar::after {
+      opacity: 1;
+    }
+
+    /* Player Actions */
+    .player-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-circle {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-circle:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: scale(1.05);
+    }
+
+    .btn-play-main {
+      background: var(--primary);
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      box-shadow: 0 0 16px var(--primary-glow);
+      border-color: var(--primary);
+    }
+
+    .btn-play-main:hover {
+      background: #0077e6;
+    }
+
+    .speed-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    @media (max-width: 768px) {
+      .player-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .scrub-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+      }
+      .now-playing {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-group">
+      <div class="badge-pill">AUDIOLIBROS & GUÍA DE ESTUDIO</div>
+      <div class="brand-title">
+        <h1>Centro de Estudio Ejecutivo | AUSOL & GCO</h1>
+        <p>Texto completo y audio sincronizado para preparar tu entrevista en cualquier lugar</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchBook('book1', this)">
+      🎙️ 1. Guía de Entrevista (Pitch & Q&A)
+    </button>
+    <button class="tab-btn" onclick="switchBook('book2', this)">
+      🕒 2. Flujo de Trabajo (Día a Día & BLUF)
+    </button>
+    <button class="tab-btn" onclick="switchBook('book3', this)">
+      📐 3. Plan de Medición (6 Pilares & BigQuery)
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- ==================== LIBRO 1 ==================== -->
+    <div id="book1" class="book-view active">
+      
+      <div class="toc-card">
+        <div class="toc-title">📑 Salto Rápido a Capítulos:</div>
+        <div class="toc-links">
+          <a class="toc-chip" href="#b1-pitch">1. Speech de Presentación (Pitch 2 min)</a>
+          <a class="toc-chip" href="#b1-defensa">2. Cómo Defender el Flujo de Trabajo</a>
+          <a class="toc-chip" href="#b1-sistemas">3. Radiografía de Sistemas (SAC, BOS, OCR)</a>
+          <a class="toc-chip" href="#b1-qa">4. Banco de Preguntas Clave (SLA, DNV, Window Funct.)</a>
+          <a class="toc-chip" href="#b1-preguntas-alejandro">5. Preguntas para Alejandro</a>
+        </div>
+      </div>
+
+      <!-- Cap 1: Pitch -->
+      <div class="section-card" id="b1-pitch">
+        <div class="section-header">
+          <h2>🎙️ Capítulo 1: Speech de Presentación de Rubén (Elevator Pitch - 2 Minutos)</h2>
+          <span class="tag">00:00 - 02:40</span>
+        </div>
+        <p>Cuando Alejandro te diga: <em>"Rubén, contame de vos, tu experiencia y qué estuviste viendo"</em>, respirás hondo y decís con total seguridad:</p>
+        
+        <div class="speech-box">
+          <p><em>"Hola Alejandro, muchas gracias por el espacio y la convocatoria.</em></p>
+          <p><em>Como le comentaba a Iván cuando nos cruzamos en el viaje, soy <strong>Analista de Datos</strong> con un perfil muy enfocado en transformar millones de registros y eventos transaccionales en decisiones operativas y de negocio concretas.</em></p>
+          <p><em>Mi stack de trabajo diario es <strong>SQL, Python, dbt, modelado relacional en Data Warehouses cloud (BigQuery) y visualización en Power BI o Looker Studio</strong>, pero mi diferencial está en entender qué pasa en la realidad detrás de cada tabla.</em></p>
+          <p><em>Estuve investigando a fondo el funcionamiento de <strong>Autopistas del Sol y Acceso Oeste</strong>, y me resultó sumamente interesante ver la madurez tecnológica que manejan. Mucha gente cree que una autopista es solo cobrar en una cabina y levantar una barrera; la realidad es que detrás hay millones de transacciones de TelePASE, antenas RFID, cámaras OCR, sensores de calzada y, sobre todo, una estructura de <strong>Gobierno IT bajo marco COBIT</strong>, donde cuidan la disponibilidad de los sistemas (BAI04) y los acuerdos de servicio con proveedores tecnológicos (APO10).</em></p>
+          <p><em>Para prepararme para esta charla, armé un plan de medición integral y una base de datos operativa en MySQL replicando el esquema de carril y los indicadores de disponibilidad de AUSOL, validando consultas clave sobre saturación de vías, horas pico y auditoría de SLAs.</em></p>
+          <p><em>Me motiva muchísimo esta oportunidad porque mi perfil encaja exactamente en ese puente: tomar las bases de datos de peajes y tráfico, estructurar modelos limpios y gobernados en BigQuery con dbt, y construir los tableros y alertas que vos y la Dirección necesitan para asegurar la continuidad operativa y la fluidez de la traza."</em></p>
+        </div>
+      </div>
+
+      <!-- Cap 2: Defensa -->
+      <div class="section-card" id="b1-defensa">
+        <div class="section-header">
+          <h2>🛡️ Capítulo 2: Cómo Defender el Flujo de Trabajo</h2>
+          <span class="tag">02:40 - 04:15</span>
+        </div>
+        <p>Si Alejandro te pregunta: <em>"Rubén, si empezás el lunes, ¿cómo organizás tu trabajo diario?"</em>:</p>
+        
+        <div class="speech-box">
+          <p><em>"Alejandro, mi trabajo se apoya en tres certezas:</em></p>
+          <p><em>1) <strong>Trabajo con un Plan de Medición previo:</strong> Antes de hacer una query, sé exactamente qué proceso COBIT impacta (BAI04 para disponibilidad, APO10 para proveedores) y qué meta de concesión busca resguardar.</em></p>
+          <p><em>2) <strong>Modernizo con BigQuery y dbt:</strong> Tomo los datos crudos del carril, los deduplico y limpio con dbt en capas para que los números que lleguen a Power BI o Looker Studio sean 100% confiables.</em></p>
+          <p><em>3) <strong>Respondo rápido y con criterio de negocio:</strong> Si vos u Operaciones me piden un dato urgente de congestión o recaudación, no les entrego un SQL ni un CSV crudo; les entrego el dato clave en la primera línea, el análisis de impacto y la consulta guardada para que sea repetible.</em></p>
+          <p><em>Mi meta es que vos e Iván tengan siempre el dato exacto antes de que surja cualquier problema en la traza o con los proveedores."</em></p>
+        </div>
+      </div>
+
+      <!-- Cap 3: Sistemas -->
+      <div class="section-card" id="b1-sistemas">
+        <div class="section-header">
+          <h2>⚙️ Capítulo 3: Radiografía de Sistemas de AUSOL y GCO</h2>
+          <span class="tag">04:15 - 05:40</span>
+        </div>
+        <p>Abertis opera dos grandes concesiones en Buenos Aires con una infraestructura tecnológica coordinada:</p>
+        <ul style="padding-left: 20px; line-height: 1.8; color: #cbd5e1; font-size: 14px;">
+          <li><strong>Dirección de Sistemas y Tecnología:</strong> Liderada por Iván Cáceres.</li>
+          <li><strong>Gerencia de Gobierno IT:</strong> Liderada por Alejandro Savy (supervisa disponibilidad, riesgos y acuerdos contractuales).</li>
+          <li><strong>Controladores SAC (Sistema de Automatización de Carril):</strong> PLC industrial en cada vía que registra sensores de piso, antenas RFID Kapsch y cámaras ANPR/OCR.</li>
+          <li><strong>Servidores BOS (Back Office System):</strong> Concentradores locales en cada peaje troncal que validan listas negras de tags y envían la recaudación al clearing nacional de TelePASE.</li>
+          <li><strong>Plataforma ENAXIS:</strong> Software corporativo de GRC donde Alejandro gestiona no conformidades, incidentes y auditorías bajo marco COBIT 2019.</li>
+        </ul>
+      </div>
+
+      <!-- Cap 4: Q&A -->
+      <div class="section-card" id="b1-qa">
+        <div class="section-header">
+          <h2>❓ Capítulo 4: Banco de Preguntas y Respuestas Clave</h2>
+          <span class="tag">05:40 - 11:30</span>
+        </div>
+
+        <div class="qa-box">
+          <div class="qa-question">1. ¿Por qué hay dos franjas pico tan marcadas en la concesión?</div>
+          <div class="qa-answer">
+            Por la dinámica laboral del AMBA y la normativa de la <strong>Dirección Nacional de Vialidad (DNV)</strong>:<br>
+            • <strong>Pico Mañana (07:00 - 10:00 hs hacia CABA):</strong> El 57% del tránsito diario y más del 50% de la recaudación se concentran entrando a Capital Federal.<br>
+            • <strong>Pico Tarde (17:00 - 20:00 hs hacia Provincia):</strong> Retorno masivo a los hogares.<br>
+            Es vital monitorearlo porque las tarifas aumentan por resolución de la DNV y los carriles deben reconfigurarse hacia el sentido más demandado.
+          </div>
+        </div>
+
+        <div class="qa-box">
+          <div class="qa-question">2. ¿Para qué queremos saber quién cumplió los Acuerdos de Nivel de Servicio (SLA)?</div>
+          <div class="qa-answer">
+            AUSOL no fabrica las antenas RFID ni las cámaras OCR; contrata a proveedores (como Kapsch). En el contrato hay un SLA que exige al menos un <strong>99.80% de disponibilidad mensual</strong>.<br>
+            Si una cámara o antena se cae o tardan en repararla, el reporte de SLA le da a Alejandro la prueba matemática para <strong>aplicar multas o descuentos en la factura mensual</strong> bajo el proceso COBIT APO10.<br>
+            Además, por ley de la DNV, si la cola supera 150 metros o 3 minutos de demora, <strong>la autopista debe levantar barreras y dejar pasar a todos gratis</strong>, perdiendo millones de pesos.
+          </div>
+        </div>
+
+        <div class="qa-box">
+          <div class="qa-question">3. ¿Qué es una Window Function en SQL y cuándo la usarías?</div>
+          <div class="qa-answer">
+            Un <code>GROUP BY</code> tradicional colapsa y aplasta las filas en una sola; si agrupo por estación, pierdo el detalle de cada carril.<br>
+            Una <strong>Window Function</strong> (como <code>DENSE_RANK()</code> o <code>SUM(...) OVER(PARTITION BY...)</code>) calcula agregaciones sobre una partición de filas (la estación) pero <strong>manteniendo intacta cada fila individual</strong>.<br>
+            La uso para comparar el carril contra el todo: mostrar cuántos autos atendió la Vía 1 (3 veh), cuántos atendió la estación (8 veh), qué porcentaje de absorción representa (37.5%) y su ranking, todo en una sola consulta sin subqueries lentas.
+          </div>
+        </div>
+
+        <div class="qa-box">
+          <div class="qa-question">4. ¿Cómo conectamos dbt y BigQuery y por qué los datos de peaje están sucios?</div>
+          <div class="qa-answer">
+            dbt Core se conecta a BigQuery mediante una Cuenta de Servicio segura con un archivo <code>profiles.yml</code>. No se tiran queries a mano; dbt organiza modelos en capas (Staging, Intermediate y Marts) y ejecuta pruebas automáticas (<code>dbt test</code>).<br>
+            Los datos de peajes están sucios porque: 1) Los tags RFID rebotan lecturas repetidas en menos de 400 ms si un auto frena; 2) Las cámaras OCR leen caracteres erróneos por barro o reflejo solar; 3) Hay registros de prueba de técnicos (TAG-999999). dbt deduplica y normaliza todo automáticamente antes de que llegue a los tableros.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Cap 5: Preguntas para Alejandro -->
+      <div class="section-card" id="b1-preguntas-alejandro">
+        <div class="section-header">
+          <h2>🎯 Capítulo 5: Preguntas Estratégicas para Alejandro al Final</h2>
+          <span class="tag">11:30 - 13:40</span>
+        </div>
+        <p>Hacer preguntas incisivas demuestra que entendiste el negocio a fondo:</p>
+        <div class="speech-box">
+          <p>1. <em>"Alejandro, viendo que gestionan el área bajo marco COBIT y paneles de disponibilidad (BAI04) en ENAXIS, ¿cuál es el SLA más desafiante de controlar en el día a día: las antenas RFID en carril, las cámaras OCR o los enlaces de fibra óptica?"</em></p>
+          <p>2. <em>"Respecto a los Acuerdos de Nivel de Servicio de proveedores, ¿hoy el cálculo de penalidades y descuentos se realiza manualmente cruzando planillas o ya lo tienen automatizado desde la base de datos?"</em></p>
+          <p>3. <em>"Con respecto al cumplimiento de tiempos de espera de la DNV (evitar colas de más de 150 metros o 3 minutos para no levantar barreras), ¿cuentan hoy con tableros en tiempo real con alertas tempranas en el CCO, o el análisis de demoras de carril se hace a mes vencido?"</em></p>
+          <p>4. <em>"Si me incorporo al equipo, ¿cuál sería el primer problema de datos o tablero prioritario en el que te gustaría que me enfoque durante los primeros 30 a 60 días para darles valor inmediato?"</em></p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== LIBRO 2 ==================== -->
+    <div id="book2" class="book-view">
+      
+      <div class="toc-card">
+        <div class="toc-title">📑 Salto Rápido a Capítulos:</div>
+        <div class="toc-links">
+          <a class="toc-chip" href="#b2-proposito">1. Propósito Estratégico</a>
+          <a class="toc-chip" href="#b2-b1">2. Bloque 1: Auditoría de Carril</a>
+          <a class="toc-chip" href="#b2-b2">3. Bloque 2: Horas Pico DNV</a>
+          <a class="toc-chip" href="#b2-b3">4. Bloque 3: Auditoría COBIT BAI04</a>
+          <a class="toc-chip" href="#b2-b4">5. Bloque 4: Window Functions</a>
+          <a class="toc-chip" href="#b2-b5">6. Bloque 5: Adopción TelePASE</a>
+          <a class="toc-chip" href="#b2-bluf">7. Protocolo BLUF</a>
+        </div>
+      </div>
+
+      <div class="section-card" id="b2-proposito">
+        <div class="section-header">
+          <h2>🏢 Capítulo 1: Propósito Estratégico del Analista de Datos</h2>
+          <span class="tag">00:00 - 01:50</span>
+        </div>
+        <p>El Analista de Datos en Gobierno IT y Operaciones actúa como el puente entre la infraestructura física y telemática de la autopista y las decisiones gerenciales de alto nivel.</p>
+        <p>Los controladores SAC de cada vía, las antenas RFID Kapsch, las cámaras OCR y las espiras transmiten millones de registros crudos que caen en Google Cloud BigQuery. dbt Core se encarga de transformarlos y limpiarlos en capas para que los tableros de Power BI, Looker Studio y Looker Data Apps muestren números 100% confiables.</p>
+      </div>
+
+      <div class="section-card" id="b2-b1">
+        <div class="section-header">
+          <h2>🕒 Bloque 1 | 09:00 - 10:15 hs: Auditoría Matutina de Carril y Fuga de Ingresos</h2>
+          <span class="pill-red">CRITICIDAD ALTA</span>
+        </div>
+        <p><strong>Objetivo:</strong> Auditar eventos anómalos de la noche y madrugada (tags inválidos, barreras violentadas o evasiones) para frenar pérdidas de recaudación antes del cierre bancario.</p>
+        <p>En Troncal Campana se detecta un Tag Inválido en Vía 1 y una Evasión en Vía 3, acumulando una pérdida de $2.210. La cámara OCR capturó la patente del vehículo evasor (AB111OP) que se deriva de inmediato a Seguridad Patrimonial y Legales para el recupero del importe.</p>
+      </div>
+
+      <div class="section-card" id="b2-b2">
+        <div class="section-header">
+          <h2>🕒 Bloque 2 | 10:15 - 12:00 hs: Monitoreo de Congestión en Horas Pico DNV</h2>
+          <span class="pill-red">CRITICIDAD CRÍTICA</span>
+        </div>
+        <p><strong>Objetivo:</strong> Evaluar la traza en las dos franjas fijadas por la Dirección Nacional de Vialidad (07:00-10:00 CABA y 17:00-20:00 Provincia).</p>
+        <p>El 57% del volumen diario y más del 50% de la recaudación se concentran en las 3 horas del Pico Mañana hacia la Capital. En Ituzaingó, el tiempo promedio salta a más de 10 segundos fuera de pico por la presencia de pagos manuales y camiones pesados.</p>
+      </div>
+
+      <div class="section-card" id="b2-b3">
+        <div class="section-header">
+          <h2>🕒 Bloque 3 | 13:00 - 14:30 hs: Auditoría de Disponibilidad y SLAs (COBIT BAI04)</h2>
+          <span class="pill-red">CRITICIDAD ALTA</span>
+        </div>
+        <p><strong>Objetivo:</strong> Monitorear uptime de sistemas y generar evidencias automáticas para Enaxis GRC.</p>
+        <p>TelePASE Clearing y SAC operan al 99.98% y 99.85% de uptime (cumplen SLA). Sin embargo, las <strong>Cámaras OCR cayeron al 98.20%</strong> con 3 incidentes abiertos y MTTR de 42 minutos. Se genera la alerta de incumplimiento contractual para descontar dinero de la factura del proveedor bajo el proceso COBIT APO10.</p>
+      </div>
+
+      <div class="section-card" id="b2-b4">
+        <div class="section-header">
+          <h2>🕒 Bloque 4 | 14:30 - 16:30 hs: Ranking de Saturación con Window Functions</h2>
+          <span class="tag">CRITICIDAD MEDIA-ALTA</span>
+        </div>
+        <p><strong>Objetivo:</strong> Responder: <em>"¿Cuáles son los carriles más exigidos de cada peaje y qué porcentaje de tránsito absorben sobre el total de la estación?"</em></p>
+        <p>Utilizando <code>DENSE_RANK()</code> y <code>SUM(...) OVER(PARTITION BY...)</code>, se concluye que la <strong>Vía 1 (TelePASE Exclusivo) absorbe el 37.5% de Ituzaingó y el 28.6% de Campana</strong>, fundamentando la necesidad técnica de transformar vías manuales a TelePASE dinámico.</p>
+      </div>
+
+      <div class="section-card" id="b2-b5">
+        <div class="section-header">
+          <h2>🕒 Bloque 5 | 16:30 - 18:00 hs: Cierre de Jornada y Adopción de TelePASE</h2>
+          <span class="pill-green">CRITICIDAD MEDIA</span>
+        </div>
+        <p><strong>Objetivo:</strong> Consolidar el ratio de digitalización del peaje y validar la ganancia de velocidad.</p>
+        <p>TelePASE procesa un vehículo en <strong>2.1 segundos</strong>, mientras que la cabina manual demora <strong>15.4 segundos</strong> (7 veces más lenta). La penetración del TelePASE alcanza el 63.5% en la traza metropolitana.</p>
+      </div>
+
+      <div class="section-card" id="b2-bluf">
+        <div class="section-header">
+          <h2>📋 Protocolo de Comunicación Ejecutiva (BLUF: Bottom Line Up Front)</h2>
+          <span class="tag">COMUNICACIÓN CON LA DIRECCIÓN</span>
+        </div>
+        <p>Los directivos no leen consultas SQL. Se utiliza el estándar BLUF: titular de negocio primero, tabla sintética en el medio y recomendación al final:</p>
+        <div class="speech-box">
+          <p><em>"Hola Alejandro, acá están los datos de Ituzaingó (sentido a CABA) entre las 07:00 y las 09:00 hs:</em></p>
+          <p><em>• <strong>Volumen total:</strong> 4 transacciones registradas (1.980 veh/hora estimados en espira).<br>
+          • <strong>Recaudación:</strong> $5.940,00.<br>
+          • <strong>Impacto del choque (km 24):</strong> A las 07:40 hs la velocidad cayó a 15.8 km/h y el tiempo en cabina manual subió a 18 segundos por congestión.<br>
+          La Vía 1 operó al 100% de capacidad absorbiendo el 37% del flujo."</em></p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== LIBRO 3 ==================== -->
+    <div id="book3" class="book-view">
+      
+      <div class="toc-card">
+        <div class="toc-title">📑 Salto Rápido a Capítulos:</div>
+        <div class="toc-links">
+          <a class="toc-chip" href="#b3-intro">1. Introducción al Plan</a>
+          <a class="toc-chip" href="#b3-p1">Pilar 1: Arquitectura & Gobierno</a>
+          <a class="toc-chip" href="#b3-p2">Pilar 2: Objetivos & KPIs DNV</a>
+          <a class="toc-chip" href="#b3-p3">Pilar 3: Matriz de Eventos de Vía</a>
+          <a class="toc-chip" href="#b3-p4">Pilar 4: Diccionario de Fórmulas</a>
+          <a class="toc-chip" href="#b3-p5">Pilar 5: JSON IoT Dev Spec</a>
+          <a class="toc-chip" href="#b3-p6">Pilar 6: BigQuery + dbt Core</a>
+        </div>
+      </div>
+
+      <div class="section-card" id="b3-intro">
+        <div class="section-header">
+          <h2>📐 Capítulo 1: ¿Por qué es Obligatorio un Plan de Medición?</h2>
+          <span class="tag">00:00 - 01:30</span>
+        </div>
+        <p>Hacer análisis sin un plan de medición previo es una mala práctica de Business Intelligence: genera métricas contradictorias entre gerencias y consultas desordenadas. El Plan de Medición de AUSOL y GCO define formalmente qué medimos, con qué fórmula y para qué objetivo contractual de la concesión.</p>
+      </div>
+
+      <div class="section-card" id="b3-p1">
+        <div class="section-header">
+          <h2>🏛️ Pilar 1: Arquitectura & Gobierno del Dato</h2>
+          <span class="tag">PILAR 1</span>
+        </div>
+        <p>Define la infraestructura dual: MySQL 8.0 para la base operativa relacional y Google Cloud BigQuery para el Data Warehouse analítico. Establece políticas estrictas de privacidad vehicular y enmascaramiento de patentes bajo normativas vigentes, adoptando nombres en minúsculas y guiones bajos (<code>snake_case</code>).</p>
+      </div>
+
+      <div class="section-card" id="b3-p2">
+        <div class="section-header">
+          <h2>🎯 Pilar 2: Objetivos de Negocio & Metas Contractuales DNV</h2>
+          <span class="tag">PILAR 2</span>
+        </div>
+        <p>Alinea las métricas con las obligaciones del contrato de concesión:</p>
+        <ul style="padding-left: 20px; line-height: 1.8; color: #cbd5e1; font-size: 14px;">
+          <li><strong>Disponibilidad de Vías SAC:</strong> Meta &ge; 99.85%.</li>
+          <li><strong>Cumplimiento de SLA Proveedores:</strong> Meta &ge; 99.80% (Marco COBIT APO10).</li>
+          <li><strong>Demora en Plaza de Peaje:</strong> Meta = 0 levantamientos de barrera por colas superiores a 150 metros o 3 minutos de espera.</li>
+          <li><strong>Fuga de Recaudación:</strong> Meta &le; 0.05% de transacciones anómalas.</li>
+        </ul>
+      </div>
+
+      <div class="section-card" id="b3-p3">
+        <div class="section-header">
+          <h2>⚡ Pilar 3: Matriz de Eventos de Vía y Señales Telemáticas</h2>
+          <span class="tag">PILAR 3</span>
+        </div>
+        <p>Catálogo exhaustivo de señales capturadas en el carril: pisada de espira de presencia, lectura de tag RFID Kapsch, captura fotográfica OCR de patente, apertura de barrera, tag inválido, evasión y caída de enlace de fibra óptica.</p>
+      </div>
+
+      <div class="section-card" id="b3-p4">
+        <div class="section-header">
+          <h2>📊 Pilar 4: Diccionario Estandarizado de Métricas y Dimensiones</h2>
+          <span class="tag">PILAR 4</span>
+        </div>
+        <p>Fórmulas oficiales para toda la compañía:</p>
+        <ul style="padding-left: 20px; line-height: 1.8; color: #cbd5e1; font-size: 14px;">
+          <li><strong>Uptime %:</strong> <code>(Tiempo Operativo / Tiempo Programado) &times; 100</code>.</li>
+          <li><strong>MTTR (Minutos):</strong> <code>Tiempo Total de Caída / Cantidad de Incidentes</code>.</li>
+          <li><strong>% Absorción de Carril:</strong> <code>(Volumen Vía / Volumen Total Estación) &times; 100</code>.</li>
+          <li><strong>Fuga Estimada ($):</strong> <code>SUM(tarifa_vigente)</code> en eventos no cobrados.</li>
+        </ul>
+      </div>
+
+      <div class="section-card" id="b3-p5">
+        <div class="section-header">
+          <h2>💻 Pilar 5: Especificación Técnica de Mensajes IoT (Dev Spec)</h2>
+          <span class="tag">PILAR 5</span>
+        </div>
+        <p>Estructura estándar de payload JSON transmitida por los controladores SAC hacia el concentrador de datos, conteniendo identificador de pasada, estación, carril, marca de tiempo precisa en milisegundos, patente OCR y código de tag RFID.</p>
+      </div>
+
+      <div class="section-card" id="b3-p6">
+        <div class="section-header">
+          <h2>☁️ Pilar 6: Modelado Dimensional en BigQuery + dbt Core</h2>
+          <span class="tag">PILAR 6</span>
+        </div>
+        <p>Estructura de modelado en 4 capas:</p>
+        <ul style="padding-left: 20px; line-height: 1.8; color: #cbd5e1; font-size: 14px;">
+          <li><strong>Capa RAW:</strong> Ingesta directa particionada por fecha (DAY) y clusterizada por estación.</li>
+          <li><strong>Capa STAGING (dbt):</strong> Deduplicación de lecturas RFID repetidas en menos de 400 ms y normalización de patentes.</li>
+          <li><strong>Capa INTERMEDIATE (dbt):</strong> Cruce con la matriz de tarifas según franjas pico de la DNV.</li>
+          <li><strong>Capa MARTS (dbt):</strong> Tablas de hechos finales (<code>fct_saturacion_vias</code> y <code>fct_auditoria_sla_cobit</code>) validadas con <code>dbt test</code> para consumo en dashboards.</li>
+        </ul>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Sticky Bottom Audio Player Dock -->
+  <div class="player-dock">
+    <div class="player-row">
+      
+      <!-- Track Info -->
+      <div class="now-playing">
+        <div class="playing-icon">🎧</div>
+        <div class="playing-info">
+          <h4 id="trackTitle">Audiolibro 1: Guía Maestra de Entrevista</h4>
+          <p id="trackSub">Voz en Español Neutro (Sabina) &bull; MP3 128 kbps</p>
+        </div>
+      </div>
+
+      <!-- Scrub Bar -->
+      <div class="scrub-container">
+        <span class="time-text" id="currentTime">00:00</span>
+        <div class="progress-bar-wrap" id="progressBar" onclick="seekAudio(event)">
+          <div class="progress-fill-bar" id="progressFill"></div>
+        </div>
+        <span class="time-text" id="durationTime">--:--</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="player-actions">
+        <button class="btn-circle" onclick="skipAudio(-15)" title="Retroceder 15s">⏪</button>
+        <button class="btn-circle btn-play-main" id="btnPlay" onclick="togglePlay()">▶</button>
+        <button class="btn-circle" onclick="skipAudio(15)" title="Adelantar 15s">⏩</button>
+        
+        <select class="speed-select" id="speedSelect" onchange="changeSpeed(this.value)">
+          <option value="1.0">1.0x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2.0">2.0x</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="mainAudio" src="Audiolibro_1_Guia_Entrevista_AUSOL.mp3" preload="metadata"></audio>
+
+  <script>
+    const audio = document.getElementById('mainAudio');
+    const btnPlay = document.getElementById('btnPlay');
+    const progressFill = document.getElementById('progressFill');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationTimeEl = document.getElementById('durationTime');
+    const trackTitle = document.getElementById('trackTitle');
+    const speedSelect = document.getElementById('speedSelect');
+
+    const bookTracks = {
+      book1: {
+        src: 'Audiolibro_1_Guia_Entrevista_AUSOL.mp3',
+        title: 'Audiolibro 1: Guía Maestra de Entrevista'
+      },
+      book2: {
+        src: 'Audiolibro_2_Flujo_Analisis_Datos_AUSOL.mp3',
+        title: 'Audiolibro 2: Flujo de Análisis de Datos & Gobierno IT'
+      },
+      book3: {
+        src: 'Audiolibro_3_Plan_de_Medicion_AUSOL.mp3',
+        title: 'Audiolibro 3: Plan de Medición y Gobierno del Dato'
+      }
+    };
+
+    let currentBookId = 'book1';
+
+    function switchBook(bookId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.book-view').forEach(v => v.classList.remove('active'));
+
+      btn.classList.add('active');
+      const targetView = document.getElementById(bookId);
+      if (targetView) targetView.classList.add('active');
+
+      if (currentBookId !== bookId) {
+        currentBookId = bookId;
+        const track = bookTracks[bookId];
+        trackTitle.textContent = track.title;
+        const wasPlaying = !audio.paused;
+        audio.src = track.src;
+        audio.load();
+        if (wasPlaying) {
+          audio.play();
+          btnPlay.textContent = '⏸';
+        } else {
+          btnPlay.textContent = '▶';
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play();
+        btnPlay.textContent = '⏸';
+      } else {
+        audio.pause();
+        btnPlay.textContent = '▶';
+      }
+    }
+
+    function skipAudio(seconds) {
+      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
+    }
+
+    function changeSpeed(val) {
+      audio.playbackRate = parseFloat(val);
+    }
+
+    function formatTime(sec) {
+      if (isNaN(sec)) return '00:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressFill.style.width = pct + '%';
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+      }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      durationTimeEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', () => {
+      btnPlay.textContent = '▶';
+      progressFill.style.width = '0%';
+    });
+
+    function seekAudio(e) {
+      const rect = progressBar.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const duration = audio.duration;
+      if (duration) {
+        audio.currentTime = (clickX / width) * duration;
+      }
+    }
+  </script>
+</body>
+</html>
