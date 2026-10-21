@@ -513,9 +513,6 @@
         <div class="pulse-dot"></div>
         <span>ENAXIS SYNC: ONLINE</span>
       </div>
-      <a href="audiolibros.html" class="station-select" style="text-decoration: none; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Escuchar Audiolibros de Preparación">
-        🎧 Audiolibros
-      </a>
       <select class="station-select" id="stationFilter" onchange="handleStationFilter(this.value)">
         <option value="ALL">Todas las Estaciones (Troncal Norte + Troncal Oeste)</option>
         <option value="CAMPANA">Troncal Norte (Ramal Campana)</option>
@@ -541,9 +538,6 @@
     <button class="tab-btn" onclick="switchTab('tab-dbt')">
       ☁️ 5. Linaje de Datos: BigQuery + dbt
     </button>
-    <a href="audiolibros.html" class="tab-btn" style="text-decoration: none; color: #38bdf8; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; background: rgba(56, 189, 248, 0.08); border-radius: 8px; margin: 4px; border: 1px solid rgba(56, 189, 248, 0.25);" title="Audiolibros interactivos con texto sincronizado">
-      🎧 6. Audiolibros & Audio-Guía
-    </a>
   </nav>
 
   <!-- Main View Area -->
@@ -597,6 +591,15 @@
           </div>
           <div class="kpi-value">99.98%</div>
           <div class="kpi-subtext">0 incidentes | 0.0 min caída</div>
+        </div>
+
+        <div class="kpi-card danger">
+          <div class="kpi-title">
+            <span>Penalidades Liquidadas Proveedores</span>
+            <span class="badge-pill badge-danger">DEDUCCIÓN FACTURA</span>
+          </div>
+          <div class="kpi-value">$4.700.000 ARS</div>
+          <div class="kpi-subtext">Ticket #101 Cámaras Campana ($3.85M) + #102 Kapsch</div>
         </div>
       </div>
 
@@ -934,19 +937,19 @@
         <div class="panel-card">
           <div class="panel-header">
             <div>
-              <h2>Auditoría de Fuga de Ingresos & Tags Inválidos</h2>
-              <span class="panel-subtitle">Detección temprana de eventos de carril no cobrados</span>
+              <h2>Auditoría de Conciliación & Fuga de Ingresos (Kapsch vs. GLM)</h2>
+              <span class="panel-subtitle">Auditoría sobre 25.000 pasadas de carril | Recaudación Bruta: $32.818.335,00 ARS</span>
             </div>
-            <span class="badge-pill badge-danger">Pérdida: $2.210,00</span>
+            <span class="badge-pill badge-danger">Fuga Total: $1.273.845,00 ARS</span>
           </div>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>Estación</th>
-                  <th>Vía</th>
+                  <th>Vía / Sistema</th>
                   <th>Tecnología</th>
-                  <th>Incidente</th>
+                  <th>Incidente Transaccional</th>
                   <th>Eventos</th>
                   <th>Fuga Estimada ($)</th>
                   <th>Acción de Mitigación</th>
@@ -955,21 +958,57 @@
               <tbody>
                 <tr>
                   <td><strong>Troncal Campana</strong></td>
-                  <td>Vía 1</td>
-                  <td>TelePASE Exclusivo</td>
-                  <td><span class="badge-pill badge-warning">Tag Inválido</span></td>
-                  <td class="mono-cell">1</td>
-                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$1.105,00</td>
-                  <td>Verificación en lista negra BOS / Débito diferido</td>
+                  <td>Vía 1 (TelePASE)</td>
+                  <td>Kapsch RFID</td>
+                  <td><span class="badge-pill badge-warning">Tag en Lista Negra GLM</span></td>
+                  <td class="mono-cell">184</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$241.115,00</td>
+                  <td>Bloqueo comercial en GLM / Notificación al titular</td>
                 </tr>
                 <tr>
                   <td><strong>Troncal Campana</strong></td>
-                  <td>Vía 3</td>
-                  <td>TelePASE Mixta</td>
+                  <td>Vía 3 y 4 (Mixta)</td>
+                  <td>Cámara OCR</td>
                   <td><span class="badge-pill badge-danger">Evasión / Barrera Rota</span></td>
-                  <td class="mono-cell">1</td>
-                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$1.105,00</td>
-                  <td>Cámara OCR capturó patente (AB111OP) &rarr; Legales</td>
+                  <td class="mono-cell">161</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$197.895,00</td>
+                  <td>Extracción de patente OCR &rarr; Remisión a Legales</td>
+                </tr>
+                <tr>
+                  <td><strong>Peaje Ituzaingó</strong></td>
+                  <td>Vía 1 y 2 (TelePASE)</td>
+                  <td>Kapsch RFID</td>
+                  <td><span class="badge-pill badge-warning">Tag en Lista Negra GLM</span></td>
+                  <td class="mono-cell">179</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$233.910,00</td>
+                  <td>Tarjeta de crédito vencida / Reintento de débito</td>
+                </tr>
+                <tr>
+                  <td><strong>Peaje Ituzaingó</strong></td>
+                  <td>Vía 3 a 6 (Barrera)</td>
+                  <td>Cámara OCR</td>
+                  <td><span class="badge-pill badge-danger">Evasión / Barrera Rota</span></td>
+                  <td class="mono-cell">158</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$193.375,00</td>
+                  <td>Infracción labrada con video grabado en carril</td>
+                </tr>
+                <tr>
+                  <td><strong>Troncal Pilar</strong></td>
+                  <td>Vía 1 (TelePASE)</td>
+                  <td>Kapsch RFID</td>
+                  <td><span class="badge-pill badge-warning">Tag en Lista Negra GLM</span></td>
+                  <td class="mono-cell">168</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$219.920,00</td>
+                  <td>Cuenta morosa suspendida en GLM SUIT</td>
+                </tr>
+                <tr>
+                  <td><strong>Troncal Pilar</strong></td>
+                  <td>Vía 4 (Barrera)</td>
+                  <td>Cámara OCR</td>
+                  <td><span class="badge-pill badge-danger">Evasión / Barrera Rota</span></td>
+                  <td class="mono-cell">154</td>
+                  <td class="mono-cell" style="color: #f87171; font-weight: bold;">$187.630,00</td>
+                  <td>Patente Mercosur archivada en BigQuery</td>
                 </tr>
               </tbody>
             </table>

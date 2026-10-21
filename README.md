@@ -38,8 +38,6 @@ El dashboard cuenta con navegación instantánea por pestañas y simulación de 
    Detección y valorización económica de tránsitos no cobrados (tags inválidos en lista negra, evasiones por barrera violentada y discrepancias de lectura de patente).
 5. **⚡ Linaje de Datos: BigQuery + dbt Core:**  
    Arquitectura técnica integral desde la ingesta cruda (JSON/Avro) en BigQuery hasta las capas de transformación y modelado dimensional en dbt (Staging, Intermediate y Marts) con pruebas automatizadas de calidad (`dbt test`).
-6. **🎧 Audiolibros & Audio-Guía Interactiva (`audiolibros.html`):**  
-   Tres audiolibros completos narrados en español neutro con reproductor multimedia adaptativo (diseño responsive mobile-first), selector de velocidad (0.75x a 2.0x), barra de avance táctil y transcripción técnica sincronizada.
 
 ---
 
